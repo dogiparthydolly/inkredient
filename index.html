@@ -664,7 +664,7 @@ footer em {
             <div class="verdict-text" id="verdictText"></div>
           </div>
           <div class="uncertainty-note">
-            ⚠ AI analysis only. Skindex can make mistakes. Reactions vary by individual skin type — consult a dermatologist for medical advice.
+            ⚠ AI analysis only. Inkredient can make mistakes. Reactions vary by individual skin type — consult a dermatologist for medical advice.
           </div>
         </div>
       </div>
@@ -686,12 +686,12 @@ footer em {
       <div class="how-card">
         <div class="how-step">Step 02</div>
         <h3>AI reads the formula</h3>
-        <p>Skindex identifies each ingredient and cross-references safety databases — EWG Skin Deep, EU CosIng, PubChem, FDA — flagging concerns with cited sources, not just colors.</p>
+        <p>Inkredient identifies each ingredient and cross-references safety databases — EWG Skin Deep, EU CosIng, PubChem, FDA — flagging concerns with cited sources, not just colors.</p>
       </div>
       <div class="how-card">
         <div class="how-step">Step 03</div>
         <h3>You decide</h3>
-        <p>The score is a signal, not a verdict. Some flagged ingredients are fine for most people. Skindex explains; you choose.</p>
+        <p>The score is a signal, not a verdict. Some flagged ingredients are fine for most people. Inkredient explains; you choose.</p>
       </div>
     </div>
   </div>
@@ -700,7 +700,7 @@ footer em {
 <!-- DISCLAIMER -->
 <div class="disclaimer">
   <div class="disclaimer-inner">
-    <strong>Disclaimer:</strong> Skindex is an AI-powered educational tool, not a medical device. Ingredient safety assessments are based on general research and may not account for individual skin conditions, allergies, or sensitivities. The model can make mistakes — ingredient databases are incomplete and science evolves. Always patch test new products and consult a licensed dermatologist for personalised advice. Skindex is not affiliated with any cosmetics brand or regulatory body.
+    <strong>Disclaimer:</strong> Inkredient is an AI-powered educational tool, not a medical device. Ingredient safety assessments are based on general research and may not account for individual skin conditions, allergies, or sensitivities. The model can make mistakes — ingredient databases are incomplete and science evolves. Always patch test new products and consult a licensed dermatologist for personalised advice. Inkredient is not affiliated with any cosmetics brand or regulatory body.
   </div>
 </div>
 
@@ -898,7 +898,7 @@ Only return JSON. No markdown, no backticks, no preamble. Never fabricate ingred
   }
 }
 
-const analysisPrompt = `You are Skindex, a skincare ingredient safety analyzer. Analyze the ingredient list and return ONLY a valid JSON object — no markdown, no backticks, no preamble.
+const analysisPrompt = `You are Inkredient, a skincare ingredient safety analyzer. Analyze the ingredient list and return ONLY a valid JSON object — no markdown, no backticks, no preamble.
 
 Return this exact JSON structure:
 {
