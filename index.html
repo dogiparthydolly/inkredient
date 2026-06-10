@@ -37,6 +37,68 @@ body {
   overflow-x: hidden;
 }
 
+/* GATE */
+#gate {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(242, 228, 220, 0.72);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.gate-box {
+  background: rgba(255,252,250,0.82);
+  border: 1px solid rgba(229,211,203,0.9);
+  max-width: 480px; width: 100%;
+  padding: 40px 36px;
+  box-shadow: 0 12px 60px rgba(139,94,82,0.12);
+}
+.gate-logo {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 28px;
+  color: var(--rose-deep); margin-bottom: 4px;
+}
+.gate-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 28px;
+}
+.gate-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; margin-bottom: 14px;
+}
+.gate-body {
+  font-size: 13px; color: var(--muted); line-height: 1.75; margin-bottom: 22px;
+}
+.gate-body strong { color: var(--ink); }
+.gate-check-row {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 22px;
+}
+.gate-check-row input[type="checkbox"] {
+  width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0;
+  accent-color: var(--rose); cursor: pointer;
+}
+.gate-check-label {
+  font-size: 13px; color: var(--clay); line-height: 1.6; cursor: pointer;
+}
+.gate-check-label strong { color: var(--ink); }
+.gate-btn {
+  width: 100%; padding: 13px;
+  background: var(--rose); color: var(--warm-white);
+  border: none; cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 18px;
+  transition: background 0.2s, opacity 0.2s;
+}
+.gate-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.gate-btn:not(:disabled):hover { background: var(--rose-deep); }
+.gate-note {
+  margin-top: 14px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--muted); letter-spacing: 0.06em; line-height: 1.6;
+}
+#mainContent { display: none; }
+
 /* NAV */
 nav {
   position: fixed; top:0; left:0; right:0; z-index:100;
@@ -478,6 +540,29 @@ footer em {
 </style>
 </head>
 <body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">Inkredient</div>
+    <div class="gate-eyebrow">Skincare Ingredient Scanner</div>
+    <div class="gate-title">A few things before you scan</div>
+    <div class="gate-body">
+      Inkredient uses AI to analyze skincare ingredient lists and flag potential concerns. It's built to inform — not diagnose. <strong>The model can make mistakes.</strong> Ingredient safety varies by skin type, concentration, and individual sensitivity. Always patch test and consult a dermatologist for medical advice.
+    </div>
+    <div class="gate-check-row">
+      <input type="checkbox" id="gateCheck" onchange="document.getElementById('gateBtn').disabled = !this.checked">
+      <label class="gate-check-label" for="gateCheck">
+        I understand this is an <strong>AI-powered tool</strong>, not medical advice. Results may be inaccurate and I will not rely solely on Inkredient for skincare decisions.
+      </label>
+    </div>
+    <button class="gate-btn" id="gateBtn" disabled onclick="enterSite()">I understand — let's scan</button>
+    <div class="gate-note">No data stored. Your photos and ingredient lists stay on your device.</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
 
 <!-- NAV -->
 <nav>
@@ -931,6 +1016,16 @@ function renderResults(result) {
 
   resultsContent.style.display = 'block';
 }
+function enterSite() {
+  const gate = document.getElementById('gate');
+  gate.style.transition = 'opacity 0.5s ease';
+  gate.style.opacity = '0';
+  setTimeout(() => {
+    gate.style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  }, 500);
+}
 </script>
+</div>
 </body>
 </html>
