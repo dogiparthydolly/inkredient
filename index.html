@@ -586,87 +586,45 @@ footer em {
       </div>
     </div>
 
-    <!-- SCAN CARD -->
-    <div class="scan-card">
-      <div class="scan-card-label">Ingredient Scanner</div>
-      <div class="scan-card-title">Scan or paste your ingredients</div>
+    <!-- CHAT CARD -->
+    <div class="scan-card" style="padding:0; overflow:hidden;">
 
-      <!-- TABS -->
-      <div class="input-tabs">
-        <button class="input-tab active" id="tabPhoto" onclick="switchTab('photo')">📸 Photo</button>
-        <button class="input-tab" id="tabText" onclick="switchTab('text')">✍️ Paste text</button>
+      <!-- Chat header -->
+      <div style="padding:20px 24px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;">
+        <div style="width:32px;height:32px;background:var(--rose);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;">✨</div>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--ink);">Inkredient</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--safe);letter-spacing:0.06em;">● online</div>
+        </div>
+        <button onclick="resetChat()" style="margin-left:auto;background:transparent;border:1px solid var(--border);padding:5px 12px;border-radius:20px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Start over</button>
       </div>
 
-      <!-- PHOTO MODE -->
-      <div id="photoMode">
-        <div class="photo-preview-wrap" id="previewWrap">
-          <img id="photoPreview" src="" alt="Product photo">
-          <button class="photo-clear-btn" onclick="clearPhoto()">✕</button>
-        </div>
-        <div class="photo-zone" id="photoZone">
-          <input type="file" id="photoFile" accept="image/*" onchange="handlePhotoFile(event)">
-          <div class="photo-icon">🧴</div>
-          <div class="photo-zone-title">Drop a product photo here</div>
-          <div class="photo-zone-sub">or tap to choose from your camera roll</div>
-        </div>
-        <button class="camera-btn" onclick="openCamera()">
-          📷 Take a photo now
-          <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handlePhotoFile(event)" style="position:absolute;opacity:0;width:0;height:0;">
-        </button>
-        <div class="extracted-note" id="extractedNote">✓ Ingredients extracted from photo</div>
+      <!-- Messages -->
+      <div id="chatMessages" style="height:380px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;">
       </div>
 
-      <!-- TEXT MODE -->
-      <div id="textMode" style="display:none;">
-        <textarea id="ingredientInput" placeholder="e.g. Water, Glycerin, Niacinamide, Sodium Lauryl Sulfate, Fragrance, Retinol, Phenoxyethanol..."></textarea>
-        <div class="scan-examples">
-          <span style="font-size:11px; color:var(--muted); align-self:center;">Try:</span>
-          <button class="example-btn" onclick="loadExample('moisturizer')">Moisturizer</button>
-          <button class="example-btn" onclick="loadExample('serum')">Vitamin C Serum</button>
-          <button class="example-btn" onclick="loadExample('cleanser')">Cleanser</button>
-          <button class="example-btn" onclick="loadExample('sunscreen')">Sunscreen</button>
+      <!-- Photo preview strip -->
+      <div id="chatPhotoPreview" style="display:none;padding:0 20px 10px;">
+        <div style="position:relative;display:inline-block;">
+          <img id="chatPhotoImg" style="height:72px;border-radius:4px;border:1px solid var(--border);">
+          <button onclick="clearChatPhoto()" style="position:absolute;top:-6px;right:-6px;background:var(--ink);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
       </div>
 
-      <button class="scan-btn" id="scanBtn" onclick="scanIngredients()" style="margin-top:4px;">
-        <span id="btnText">Analyse ingredients</span>
-      </button>
-
-      <!-- CONFIRMATION PANEL -->
-      <div class="confirm-panel" id="confirmPanel">
-        <div class="confirm-panel-label">Is this your product?</div>
-        <div class="confirm-product-name" id="confirmProductName"></div>
-        <div class="confirm-ingredients-preview" id="confirmIngredientPreview"></div>
-        <div class="confirm-note">⚠ These ingredients are inferred from our knowledge of this product. They may not reflect the exact current formula — formulations change. Confirm to run the safety analysis, or paste the actual label for certainty.</div>
-        <div class="confirm-btns">
-          <button class="confirm-yes" onclick="confirmAndAnalyze()">Yes, analyse these ingredients</button>
-          <button class="confirm-no" onclick="dismissConfirm()">Not my product</button>
+      <!-- Input area -->
+      <div style="border-top:1px solid var(--border);padding:14px 16px;display:flex;gap:10px;align-items:flex-end;">
+        <div style="flex:1;position:relative;">
+          <textarea id="chatInput" placeholder="Type a product name or ingredient list…" style="width:100%;resize:none;border:1px solid var(--border);border-radius:20px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--cream);outline:none;line-height:1.5;max-height:100px;overflow-y:auto;" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
         </div>
-      </div>
-
-      <div id="results">
-        <div id="loadingState" class="loading-state" style="display:none;">
-          <div class="loading-petals">
-            <div class="loading-petal"></div>
-            <div class="loading-petal"></div>
-            <div class="loading-petal"></div>
-          </div>
-          <div class="loading-text">Reading your formula…</div>
-        </div>
-        <div id="resultsContent" style="display:none;">
-          <div class="results-header">
-            <div class="results-title">Ingredient breakdown</div>
-            <div class="results-summary" id="summaryChips"></div>
-          </div>
-          <div class="ingredient-list" id="ingredientList"></div>
-          <div class="overall-verdict" id="verdict" style="display:none;">
-            <div class="verdict-label">Overall assessment</div>
-            <div class="verdict-text" id="verdictText"></div>
-          </div>
-          <div class="uncertainty-note">
-            ⚠ AI analysis only. Inkredient can make mistakes. Reactions vary by individual skin type — consult a dermatologist for medical advice.
-          </div>
-        </div>
+        <label style="cursor:pointer;width:36px;height:36px;background:var(--blush);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;" title="Upload photo">
+          📸
+          <input type="file" accept="image/*" onchange="handleChatPhoto(event)" style="display:none;">
+        </label>
+        <label style="cursor:pointer;width:36px;height:36px;background:var(--blush);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;" title="Take photo">
+          📷
+          <input type="file" accept="image/*" capture="environment" onchange="handleChatPhoto(event)" style="display:none;">
+        </label>
+        <button onclick="sendMessage()" id="sendBtn" style="width:36px;height:36px;background:var(--rose);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:15px;transition:background 0.15s;">➤</button>
       </div>
     </div>
   </div>
@@ -709,7 +667,422 @@ footer em {
 </footer>
 
 <script>
-const examples = {
+// ── State ──────────────────────────────────────────
+let chatStep = 'greeting'; // greeting → concern → confirming → analyzing → done
+let pendingPhoto = null;   // { base64, mediaType }
+let pendingIngredients = null;
+let pendingProductName = null;
+let userConcern = null;
+
+// ── Boot ───────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => addBotMessage("Hi! 👋 I'm Inkredient. Tell me what product you're looking at — type the name, paste the ingredient list, or snap a photo of the back label."), 400);
+  setTimeout(() => addQuickReplies(['📸 Take a photo', '🧴 Paste ingredient list', '💄 Try an example']), 900);
+});
+
+// ── Chat UI helpers ────────────────────────────────
+function addBotMessage(html, extraClass = '') {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;gap:8px;align-items:flex-start;';
+  wrap.innerHTML = `
+    <div style="width:28px;height:28px;background:var(--rose);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;">✨</div>
+    <div class="bot-bubble ${extraClass}" style="background:var(--blush);border:1px solid var(--border);border-radius:2px 16px 16px 2px;padding:12px 16px;font-size:13px;line-height:1.65;max-width:85%;color:var(--ink);">${html}</div>
+  `;
+  appendMessage(wrap);
+}
+
+function addUserMessage(text, imgSrc = null) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;justify-content:flex-end;';
+  let inner = '';
+  if (imgSrc) inner += `<img src="${imgSrc}" style="display:block;max-height:80px;border-radius:8px;margin-bottom:6px;">`;
+  if (text) inner += `<div style="font-size:13px;">${text}</div>`;
+  wrap.innerHTML = `<div style="background:var(--rose);color:var(--warm-white);border-radius:16px 2px 2px 16px;padding:12px 16px;font-size:13px;line-height:1.65;max-width:85%;">${inner}</div>`;
+  appendMessage(wrap);
+}
+
+function addTypingIndicator() {
+  const wrap = document.createElement('div');
+  wrap.id = 'typingIndicator';
+  wrap.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  wrap.innerHTML = `
+    <div style="width:28px;height:28px;background:var(--rose);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">✨</div>
+    <div style="background:var(--blush);border:1px solid var(--border);border-radius:2px 16px 16px 2px;padding:12px 16px;display:flex;gap:5px;align-items:center;">
+      <div style="width:7px;height:7px;background:var(--rose);border-radius:50%;animation:petalPulse 1.2s ease-in-out infinite;"></div>
+      <div style="width:7px;height:7px;background:var(--rose);border-radius:50%;animation:petalPulse 1.2s ease-in-out infinite;animation-delay:0.2s;"></div>
+      <div style="width:7px;height:7px;background:var(--rose);border-radius:50%;animation:petalPulse 1.2s ease-in-out infinite;animation-delay:0.4s;"></div>
+    </div>`;
+  appendMessage(wrap);
+  return wrap;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function addQuickReplies(options) {
+  const wrap = document.createElement('div');
+  wrap.id = 'quickReplies';
+  wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;padding-left:36px;';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.style.cssText = 'background:var(--warm-white);border:1px solid var(--border);padding:7px 14px;border-radius:20px;font-size:12px;color:var(--clay);cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s;';
+    btn.onmouseenter = () => { btn.style.background = 'var(--blush)'; btn.style.borderColor = 'var(--rose)'; };
+    btn.onmouseleave = () => { btn.style.background = 'var(--warm-white)'; btn.style.borderColor = 'var(--border)'; };
+    btn.onclick = () => handleQuickReply(opt);
+    wrap.appendChild(btn);
+  });
+  appendMessage(wrap);
+}
+
+function removeQuickReplies() {
+  const el = document.getElementById('quickReplies');
+  if (el) el.remove();
+}
+
+function appendMessage(el) {
+  const container = document.getElementById('chatMessages');
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+// ── Photo handling ─────────────────────────────────
+function handleChatPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pendingPhoto = { base64: e.target.result.split(',')[1], mediaType: file.type || 'image/jpeg', src: e.target.result };
+    document.getElementById('chatPhotoImg').src = e.target.result;
+    document.getElementById('chatPhotoPreview').style.display = 'block';
+    document.getElementById('chatInput').placeholder = 'Photo ready — tap send or add a note…';
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function clearChatPhoto() {
+  pendingPhoto = null;
+  document.getElementById('chatPhotoPreview').style.display = 'none';
+  document.getElementById('chatInput').placeholder = 'Type a product name or ingredient list…';
+}
+
+// ── Quick replies ──────────────────────────────────
+function handleQuickReply(opt) {
+  removeQuickReplies();
+  if (opt === '📸 Take a photo' || opt === '📸 Upload a photo') {
+    addUserMessage('📸 I\'ll take a photo');
+    document.querySelector('input[capture="environment"]').click();
+    setTimeout(() => addBotMessage('Nice — snap the back of the product so I can read the ingredients label. Good lighting helps! 📸'), 400);
+  } else if (opt === '🧴 Paste ingredient list') {
+    addUserMessage('I\'ll paste the ingredient list');
+    setTimeout(() => addBotMessage('Perfect — paste the ingredient list below and hit send. You can copy it straight from the back of your product.'), 400);
+  } else if (opt === '💄 Try an example') {
+    addUserMessage('Show me an example');
+    processInput('Neutrogena Ultra Sheer Dry-Touch Sunscreen SPF 50', null);
+  } else if (opt === '✅ Yes, that\'s it') {
+    removeQuickReplies();
+    askConcern();
+  } else if (opt === '❌ Not my product') {
+    removeQuickReplies();
+    addUserMessage('Not my product');
+    setTimeout(() => {
+      addBotMessage('No worries! Try typing the exact product name, paste the ingredient list, or snap a photo of the back label.');
+      chatStep = 'greeting';
+      pendingIngredients = null;
+      pendingProductName = null;
+    }, 400);
+  } else if (['Breakouts / acne', 'Sensitive skin', 'Fragrance-free', 'Pregnancy-safe', 'All concerns'].includes(opt)) {
+    userConcern = opt;
+    addUserMessage(opt);
+    runFinalAnalysis();
+  }
+}
+
+// ── Send message ───────────────────────────────────
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text && !pendingPhoto) return;
+
+  const photo = pendingPhoto;
+  if (text) addUserMessage(text, photo ? photo.src : null);
+  else if (photo) addUserMessage(null, photo.src);
+
+  input.value = '';
+  input.style.height = 'auto';
+  clearChatPhoto();
+  removeQuickReplies();
+
+  await processInput(text, photo);
+}
+
+async function processInput(text, photo) {
+  const typing = addTypingIndicator();
+  await sleep(700);
+  removeTyping();
+
+  if (photo) {
+    // Photo path — extract ingredients
+    await extractFromPhoto(photo);
+  } else if (text) {
+    if (looksLikeIngredientList(text)) {
+      pendingIngredients = text;
+      addBotMessage('Got it — I can see a full ingredient list. Let me ask one quick thing first...');
+      await sleep(500);
+      askConcern();
+    } else {
+      await lookupProduct(text);
+    }
+  }
+}
+
+// ── Product lookup ─────────────────────────────────
+async function lookupProduct(productName) {
+  const typing = addTypingIndicator();
+  try {
+    const res = await callClaude([{
+      role: 'user',
+      content: `The user typed "${productName}" into a skincare scanner. Determine if this is a recognisable cosmetic/skincare product.
+
+Return ONLY JSON:
+{
+  "recognised": true/false,
+  "product_name": "Full official product name",
+  "brand": "Brand",
+  "ingredients": "Full INCI ingredient list comma-separated",
+  "confidence": "high/medium/low"
+}
+
+If not recognised or unsure of ingredients, return {"recognised": false}.
+Never fabricate ingredients. Only return JSON.`
+    }]);
+
+    removeTyping();
+    const result = JSON.parse(res.replace(/```json|```/g, '').trim());
+
+    if (result.recognised && result.ingredients) {
+      pendingIngredients = result.ingredients;
+      pendingProductName = `${result.brand} — ${result.product_name}`;
+      const confNote = result.confidence === 'low' ? '<br><small style="color:var(--muted);">⚠ I\'m not 100% certain this is the right formula — formulations do change. Confirm if it looks right.</small>' : '';
+      addBotMessage(`Found it! 🎉<br><br><strong>${result.brand} — ${result.product_name}</strong><br><br><span style="font-size:12px;color:var(--muted);">${result.ingredients.split(',').slice(0,6).join(', ')}${result.ingredients.split(',').length > 6 ? '...' : ''}</span>${confNote}<br><br>Is this the one you're looking at?`);
+      await sleep(400);
+      addQuickReplies(['✅ Yes, that\'s it', '❌ Not my product']);
+      chatStep = 'confirming';
+    } else {
+      addBotMessage(`Hmm, I couldn't find a specific formula for <strong>"${productName}"</strong>. Could you:<br><br>• Paste the ingredient list from the back label<br>• Or snap a photo of the ingredients panel 📸`);
+      chatStep = 'greeting';
+    }
+  } catch(e) {
+    removeTyping();
+    addBotMessage('Something went wrong — could you try again?');
+  }
+}
+
+// ── Photo extraction ───────────────────────────────
+async function extractFromPhoto(photo) {
+  const typing = addTypingIndicator();
+  try {
+    const res = await callClaudeVision(photo, `Read the ingredient list from this product photo. Return ONLY JSON:
+{
+  "found": true/false,
+  "product_name": "product name if visible",
+  "brand": "brand if visible",
+  "ingredients": "full ingredient list as comma-separated string"
+}
+If no ingredient list is readable, return {"found": false}. Only return JSON.`);
+
+    removeTyping();
+    const result = JSON.parse(res.replace(/```json|```/g, '').trim());
+
+    if (result.found && result.ingredients) {
+      pendingIngredients = result.ingredients;
+      pendingProductName = result.brand ? `${result.brand}${result.product_name ? ' — ' + result.product_name : ''}` : result.product_name || 'Your product';
+      addBotMessage(`✓ I can read the label! Found <strong>${result.ingredients.split(',').length} ingredients</strong>${result.product_name ? ` for <strong>${pendingProductName}</strong>` : ''}.<br><br><span style="font-size:12px;color:var(--muted);">${result.ingredients.split(',').slice(0,5).join(', ')}…</span><br><br>Looks good?`);
+      await sleep(400);
+      addQuickReplies(['✅ Yes, that\'s it', '❌ Not my product']);
+      chatStep = 'confirming';
+    } else {
+      addBotMessage('I couldn\'t quite read the ingredient list from that photo. Try:<br>• Better lighting 💡<br>• Hold the camera closer<br>• Make sure the ingredients panel is in frame');
+    }
+  } catch(e) {
+    removeTyping();
+    addBotMessage('Trouble reading that photo — could you try again or paste the ingredient list?');
+  }
+}
+
+// ── Ask concern ────────────────────────────────────
+function askConcern() {
+  chatStep = 'concern';
+  addBotMessage('Any specific skin concerns I should flag for? 👇');
+  addQuickReplies(['Breakouts / acne', 'Sensitive skin', 'Fragrance-free', 'Pregnancy-safe', 'All concerns']);
+}
+
+// ── Final analysis ─────────────────────────────────
+async function runFinalAnalysis() {
+  chatStep = 'analyzing';
+  const typing = addTypingIndicator();
+
+  const concernNote = userConcern && userConcern !== 'All concerns'
+    ? `The user is specifically concerned about: ${userConcern}. Highlight ingredients particularly relevant to this concern.`
+    : 'Flag all common concerns.';
+
+  try {
+    const res = await callClaude([{
+      role: 'user',
+      content: `You are Inkredient, a skincare ingredient safety analyzer. Analyze this ingredient list${pendingProductName ? ` for ${pendingProductName}` : ''}.
+
+Ingredient list: "${pendingIngredients}"
+
+${concernNote}
+
+Return ONLY valid JSON — no markdown, no backticks:
+{
+  "ingredients": [
+    {
+      "name": "ingredient name",
+      "status": "safe" | "caution" | "flagged",
+      "tag": "short label",
+      "description": "1-2 sentence plain-language explanation",
+      "source": "EWG Skin Deep | EU CosIng Database | PubChem | FDA Cosmetics | IARC",
+      "source_url": "real URL or empty string — never fabricate"
+    }
+  ],
+  "safe_count": number,
+  "caution_count": number,
+  "flagged_count": number,
+  "verdict": "2-3 sentence conversational overall assessment",
+  "concern_summary": "1 sentence specifically addressing the user's stated concern if any"
+}`
+    }]);
+
+    removeTyping();
+    const result = JSON.parse(res.replace(/```json|```/g, '').trim());
+
+    // Summary message
+    const hasFlags = result.flagged_count > 0;
+    const emoji = hasFlags ? '⚠️' : '✅';
+    addBotMessage(`${emoji} ${result.verdict}${result.concern_summary ? `<br><br><em style="color:var(--clay);">${result.concern_summary}</em>` : ''}`);
+
+    await sleep(500);
+
+    // Chips
+    let chips = '';
+    if (result.safe_count > 0) chips += `<span style="background:var(--safe-bg);color:var(--safe);border:1px solid rgba(107,170,142,0.3);padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;">✓ ${result.safe_count} safe</span> `;
+    if (result.caution_count > 0) chips += `<span style="background:var(--caution-bg);color:var(--caution);border:1px solid rgba(212,149,90,0.3);padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;">⚠ ${result.caution_count} caution</span> `;
+    if (result.flagged_count > 0) chips += `<span style="background:var(--flag-bg);color:var(--flag);border:1px solid rgba(194,92,92,0.3);padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;">🚩 ${result.flagged_count} flagged</span>`;
+
+    // Ingredient rows
+    let rows = result.ingredients.map(ing => {
+      const color = ing.status === 'flagged' ? 'var(--flag)' : ing.status === 'caution' ? 'var(--caution)' : 'var(--safe)';
+      const bg = ing.status === 'flagged' ? 'var(--flag-bg)' : ing.status === 'caution' ? 'var(--caution-bg)' : 'var(--safe-bg)';
+      const sourceHtml = ing.source ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px;">Source: ${ing.source_url ? `<a href="${ing.source_url}" target="_blank" style="color:var(--rose);text-decoration:none;">${ing.source}</a>` : ing.source}</div>` : '';
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:${bg};border:1px solid ${color}22;margin-bottom:6px;border-radius:2px;">
+        <div style="width:7px;height:7px;background:${color};border-radius:50%;margin-top:5px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:13px;">${ing.name}</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;">${ing.description}</div>
+          ${sourceHtml}
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;background:${bg};color:${color};padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid ${color}44;">${ing.tag}</div>
+      </div>`;
+    }).join('');
+
+    addBotMessage(`<div style="margin-bottom:12px;">${chips}</div>${rows}<div style="margin-top:10px;padding:10px;background:rgba(156,126,118,0.08);border-left:2px solid var(--muted);font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.6;">⚠ AI analysis only. Inkredient can make mistakes. Reactions vary — consult a dermatologist for medical advice.</div>`);
+
+    chatStep = 'done';
+    await sleep(600);
+    addBotMessage('Want to scan another product? 🌸');
+    addQuickReplies(['📸 Scan another', '🔄 Start over']);
+
+  } catch(e) {
+    removeTyping();
+    addBotMessage('Something went wrong analyzing the ingredients. Could you try again?');
+    chatStep = 'greeting';
+  }
+}
+
+// ── API helpers ────────────────────────────────────
+async function callClaude(messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages })
+  });
+  const data = await res.json();
+  return data.content[0].text;
+}
+
+async function callClaudeVision(photo, prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: photo.mediaType, data: photo.base64 } },
+        { type: 'text', text: prompt }
+      ]}]
+    })
+  });
+  const data = await res.json();
+  return data.content[0].text;
+}
+
+function looksLikeIngredientList(text) {
+  const commas = (text.match(/,/g) || []).length;
+  const words = text.trim().split(/\s+/).length;
+  const iciTerms = ['water','aqua','glycerin','niacinamide','dimethicone','phenoxyethanol','fragrance','parfum','alcohol','acid','sodium','potassium','cetearyl','carbomer','tocopheryl','hyaluronate','propanediol','panthenol','ascorbic','butylene','caprylic','lauryl','silica'];
+  const hasIci = iciTerms.some(t => text.toLowerCase().includes(t));
+  return commas >= 3 || (commas >= 1 && hasIci) || (words > 10 && hasIci);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function resetChat() {
+  document.getElementById('chatMessages').innerHTML = '';
+  chatStep = 'greeting';
+  pendingPhoto = null; pendingIngredients = null; pendingProductName = null; userConcern = null;
+  clearChatPhoto();
+  setTimeout(() => addBotMessage("Hi again! 👋 What product are you looking at?"), 300);
+  setTimeout(() => addQuickReplies(['📸 Take a photo', '🧴 Paste ingredient list', '💄 Try an example']), 700);
+}
+
+// Handle "Scan another" / "Start over" quick replies
+const _origHandleQR = handleQuickReply;
+function handleQuickReply(opt) {
+  if (opt === '📸 Scan another' || opt === '🔄 Start over') {
+    removeQuickReplies();
+    resetChat();
+  } else {
+    _origHandleQR(opt);
+  }
+}
+
+function enterSite() {
+  const gate = document.getElementById('gate');
+  gate.style.transition = 'opacity 0.5s ease';
+  gate.style.opacity = '0';
+  setTimeout(() => {
+    gate.style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  }, 500);
+}
+</script>
+</div>
+</body>
+</html>
   moisturizer: "Water, Glycerin, Dimethicone, Niacinamide, Cetearyl Alcohol, Sodium Hyaluronate, Fragrance, Phenoxyethanol, Carbomer, Sodium Hydroxide, Tocopheryl Acetate",
   serum: "Water, Ascorbic Acid, Propanediol, Niacinamide, Panthenol, Ferulic Acid, Sodium Hyaluronate, Triethanolamine, Alcohol Denat., Phenoxyethanol, Disodium EDTA",
   cleanser: "Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Sodium Lauryl Sulfate, Glycerin, Fragrance, Citric Acid, Sodium Benzoate, Polyquaternium-7",
@@ -898,124 +1271,6 @@ Only return JSON. No markdown, no backticks, no preamble. Never fabricate ingred
   }
 }
 
-const analysisPrompt = `You are Inkredient, a skincare ingredient safety analyzer. Analyze the ingredient list and return ONLY a valid JSON object — no markdown, no backticks, no preamble.
-
-Return this exact JSON structure:
-{
-  "ingredients": [
-    {
-      "name": "ingredient name",
-      "status": "safe" | "caution" | "flagged",
-      "tag": "short label (e.g. Humectant, Irritant, Allergen, Active)",
-      "description": "1-2 sentence plain-language explanation of what it is and why it's flagged/safe",
-      "source": "most authoritative reference: 'EWG Skin Deep', 'EU CosIng Database', 'PubChem', 'FDA Cosmetics', or 'IARC'",
-      "source_url": "real direct URL to this ingredient's entry on that source, or empty string if unsure — never fabricate"
-    }
-  ],
-  "safe_count": number,
-  "caution_count": number,
-  "flagged_count": number,
-  "verdict": "2-3 sentence overall assessment of the formula's safety profile"
-}
-
-Rules:
-- safe = generally well-tolerated, beneficial, or inert
-- caution = potentially irritating for sensitive skin, worth noting
-- flagged = known irritant, allergen, endocrine disruptor, or commonly problematic
-- Cite EWG Skin Deep as default for most cosmetic ingredients; EU CosIng for European regulatory context; PubChem for chemical data; FDA/IARC for regulatory/carcinogen flags
-- Never fabricate source URLs — use empty string if uncertain
-- Only return the JSON, nothing else`;
-
-async function runAnalysis(ingredientText, isPhoto) {
-  const resultsDiv = document.getElementById('results');
-  const loadingState = document.getElementById('loadingState');
-  const resultsContent = document.getElementById('resultsContent');
-
-  resultsDiv.style.display = 'block';
-  loadingState.style.display = 'flex';
-  loadingState.querySelector('.loading-text').textContent = 'Reading your formula…';
-  resultsContent.style.display = 'none';
-
-  try {
-    let messages;
-
-    if (isPhoto && capturedImageBase64) {
-      messages = [{
-        role: "user",
-        content: [
-          { type: "image", source: { type: "base64", media_type: capturedMediaType, data: capturedImageBase64 } },
-          { type: "text", text: `This is a photo of the back of a cosmetic product. Read the ingredient list from the image, then analyze it.\n\n${analysisPrompt}\n\nIf no ingredient list is visible, return: {"error": "No ingredient list found in image"}` }
-        ]
-      }];
-    } else {
-      messages = [{
-        role: "user",
-        content: `Ingredient list: "${ingredientText}"\n\n${analysisPrompt}`
-      }];
-    }
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages })
-    });
-
-    const data = await response.json();
-    const text = data.content[0].text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(text);
-
-    if (result.error) {
-      loadingState.style.display = 'none';
-      resultsContent.style.display = 'block';
-      document.getElementById('ingredientList').innerHTML = `<div style="padding:16px;color:var(--flag);font-size:13px;">⚠ ${result.error}. Try a clearer photo of the ingredients panel, or switch to text mode.</div>`;
-      return;
-    }
-
-    if (isPhoto) document.getElementById('extractedNote').style.display = 'block';
-    renderResults(result);
-
-  } catch (err) {
-    loadingState.style.display = 'none';
-    resultsContent.style.display = 'block';
-    document.getElementById('ingredientList').innerHTML = `<div style="padding:16px;color:var(--flag);font-size:13px;">Something went wrong. Please try again.</div>`;
-  }
-}
-
-function renderResults(result) {
-  document.getElementById('loadingState').style.display = 'none';
-  const resultsContent = document.getElementById('resultsContent');
-  const list = document.getElementById('ingredientList');
-  const chips = document.getElementById('summaryChips');
-
-  chips.innerHTML = '';
-  if (result.safe_count > 0) chips.innerHTML += `<span class="summary-chip chip-safe">✓ ${result.safe_count} safe</span>`;
-  if (result.caution_count > 0) chips.innerHTML += `<span class="summary-chip chip-caution">⚠ ${result.caution_count} caution</span>`;
-  if (result.flagged_count > 0) chips.innerHTML += `<span class="summary-chip chip-flag">🚩 ${result.flagged_count} flagged</span>`;
-
-  list.innerHTML = '';
-  result.ingredients.forEach((ing, i) => {
-    const row = document.createElement('div');
-    row.className = `ingredient-row ${ing.status === 'flagged' ? 'flagged' : ing.status}`;
-    row.style.animationDelay = `${i * 0.04}s`;
-    row.innerHTML = `
-      <div class="ing-status"></div>
-      <div style="flex:1;">
-        <div class="ing-name">${ing.name}</div>
-        <div class="ing-desc">${ing.description}</div>
-        ${ing.source ? `<div class="ing-source">Source: ${ing.source_url ? `<a href="${ing.source_url}" target="_blank" rel="noopener">${ing.source}</a>` : ing.source}</div>` : ''}
-      </div>
-      <div class="ing-tag">${ing.tag}</div>
-    `;
-    list.appendChild(row);
-  });
-
-  if (result.verdict) {
-    document.getElementById('verdictText').textContent = result.verdict;
-    document.getElementById('verdict').style.display = 'block';
-  }
-
-  resultsContent.style.display = 'block';
-}
 function enterSite() {
   const gate = document.getElementById('gate');
   gate.style.transition = 'opacity 0.5s ease';
