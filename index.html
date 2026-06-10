@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skindex — Know What's on Your Skin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --blush:    #F2E4DC;
+  --petal:    #EDD5C8;
+  --rose:     #C9806A;
+  --rose-deep:#A85F4A;
+  --cream:    #FBF6F2;
+  --warm-white:#FFFCFA;
+  --clay:     #8C5E52;
+  --ink:      #2D1F1A;
+  --muted:    #9C7E76;
+  --border:   #E5D3CB;
+  --safe:     #6BAA8E;
+  --caution:  #D4955A;
+  --flag:     #C25C5C;
+  --safe-bg:  rgba(107,170,142,0.12);
+  --caution-bg: rgba(212,149,90,0.12);
+  --flag-bg:  rgba(194,92,92,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 60px;
+  background: rgba(251,246,242,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 24px;
+  color: var(--rose-deep); letter-spacing: 0.01em;
+}
+.nav-tagline {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.nav-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--petal); border: 1px solid var(--border);
+  padding: 5px 12px; border-radius: 20px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--clay); letter-spacing: 0.06em;
+}
+.nav-dot { width:6px; height:6px; border-radius:50%; background:var(--safe); }
+
+/* HERO */
+.hero {
+  padding: 140px 40px 80px;
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.hero-left {}
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-eyebrow::before {
+  content: ''; display: block; width: 28px; height: 1px; background: var(--rose);
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -0.02em; margin-bottom: 20px;
+}
+.hero h1 em {
+  font-style: italic; color: var(--rose);
+}
+.hero-sub {
+  font-size: 16px; color: var(--muted);
+  line-height: 1.7; max-width: 420px; margin-bottom: 36px;
+}
+.hero-pills {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.pill {
+  background: var(--blush); border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; color: var(--clay); font-weight: 500;
+}
+
+/* SCAN CARD */
+.scan-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 36px;
+  box-shadow: 0 8px 40px rgba(139,94,82,0.08);
+}
+.scan-card-label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 16px;
+}
+.scan-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; margin-bottom: 20px; color: var(--ink);
+}
+textarea#ingredientInput {
+  width: 100%; height: 130px;
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 2px; padding: 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--ink); resize: vertical; line-height: 1.6;
+  transition: border-color 0.2s;
+  outline: none;
+}
+textarea#ingredientInput:focus { border-color: var(--rose); }
+textarea#ingredientInput::placeholder { color: var(--muted); }
+
+.scan-examples {
+  display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 20px;
+}
+.example-btn {
+  background: transparent; border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; color: var(--muted); cursor: pointer;
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.example-btn:hover { background: var(--blush); color: var(--clay); border-color: var(--petal); }
+
+.scan-btn {
+  width: 100%; padding: 14px;
+  background: var(--rose); color: var(--warm-white);
+  border: none; border-radius: 2px; cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 18px;
+  letter-spacing: 0.02em;
+  transition: background 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.scan-btn:hover { background: var(--rose-deep); }
+.scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* RESULTS */
+#results { margin-top: 28px; display: none; }
+.results-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+}
+.results-title {
+  font-family: 'Playfair Display', serif; font-size: 17px;
+}
+.results-summary {
+  display: flex; gap: 10px;
+}
+.summary-chip {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 3px 10px; border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+.chip-safe    { background: var(--safe-bg);    color: var(--safe);    border: 1px solid rgba(107,170,142,0.3); }
+.chip-caution { background: var(--caution-bg); color: var(--caution); border: 1px solid rgba(212,149,90,0.3); }
+.chip-flag    { background: var(--flag-bg);    color: var(--flag);    border: 1px solid rgba(194,92,92,0.3); }
+
+.ingredient-list { display: flex; flex-direction: column; gap: 8px; }
+.ingredient-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: 2px;
+  border: 1px solid transparent;
+  animation: fadeIn 0.3s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeIn { to { opacity: 1; } }
+.ingredient-row.safe    { background: var(--safe-bg);    border-color: rgba(107,170,142,0.2); }
+.ingredient-row.caution { background: var(--caution-bg); border-color: rgba(212,149,90,0.2); }
+.ingredient-row.flagged { background: var(--flag-bg);    border-color: rgba(194,92,92,0.2); }
+
+.ing-status {
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-top: 5px; flex-shrink: 0;
+}
+.safe .ing-status    { background: var(--safe); }
+.caution .ing-status { background: var(--caution); }
+.flagged .ing-status { background: var(--flag); }
+
+.ing-name {
+  font-weight: 600; font-size: 13px; margin-bottom: 2px;
+}
+.ing-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.ing-tag {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  margin-left: auto; padding: 2px 8px; border-radius: 20px;
+  white-space: nowrap; align-self: flex-start; flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.safe .ing-tag    { background: var(--safe-bg);    color: var(--safe); }
+.caution .ing-tag { background: var(--caution-bg); color: var(--caution); }
+.flagged .ing-tag { background: var(--flag-bg);    color: var(--flag); }
+
+.overall-verdict {
+  margin-top: 16px; padding: 16px;
+  background: var(--blush); border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.verdict-label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 6px;
+}
+.verdict-text {
+  font-size: 13px; color: var(--ink); line-height: 1.65;
+}
+
+.uncertainty-note {
+  margin-top: 10px; padding: 10px 14px;
+  background: rgba(156,126,118,0.08); border-left: 2px solid var(--muted);
+  font-size: 11px; color: var(--muted); line-height: 1.6;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.02em;
+}
+
+/* LOADING */
+.loading-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px; gap: 14px;
+}
+.loading-petals {
+  display: flex; gap: 6px;
+}
+.loading-petal {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rose); opacity: 0.3;
+  animation: petalPulse 1.2s ease-in-out infinite;
+}
+.loading-petal:nth-child(2) { animation-delay: 0.2s; }
+.loading-petal:nth-child(3) { animation-delay: 0.4s; }
+@keyframes petalPulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.loading-text {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 15px; color: var(--muted);
+}
+
+/* HOW IT WORKS */
+.how-section {
+  background: var(--blush);
+  padding: 80px 40px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.how-inner { max-width: 1100px; margin: 0 auto; }
+.how-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 12px;
+}
+.how-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 42px); font-weight: 700;
+  margin-bottom: 48px;
+}
+.how-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+}
+.how-card {
+  background: var(--warm-white); padding: 28px;
+  border: 1px solid var(--border);
+}
+.how-step {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--rose); letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.how-card h3 {
+  font-family: 'Playfair Display', serif; font-size: 18px;
+  margin-bottom: 10px;
+}
+.how-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+.ing-source {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--muted); margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.ing-source a {
+  color: var(--rose); text-decoration: none;
+  border-bottom: 1px solid rgba(201,128,106,0.3);
+}
+.ing-source a:hover { border-bottom-color: var(--rose); }
+
+/* FLAGS REFERENCE */
+.flags-section {
+  max-width: 1100px; margin: 0 auto; padding: 80px 40px;
+}
+.flags-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2px;
+}
+.flag-card {
+  background: var(--warm-white); padding: 22px 24px;
+  border: 1px solid var(--border);
+}
+.flag-card-name {
+  font-weight: 600; font-size: 14px; margin-bottom: 4px;
+}
+.flag-card-category {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.flag-card-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.flag-card.flagged-card .flag-card-category { color: var(--flag); }
+.flag-card.caution-card .flag-card-category { color: var(--caution); }
+
+/* DISCLAIMER */
+.disclaimer {
+  background: var(--petal); border-top: 1px solid var(--border);
+  padding: 28px 40px;
+}
+.disclaimer-inner {
+  max-width: 1100px; margin: 0 auto;
+  font-size: 12px; color: var(--clay); line-height: 1.7;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.02em;
+}
+.disclaimer-inner strong { color: var(--rose-deep); }
+
+/* FOOTER */
+footer {
+  background: var(--ink); color: var(--blush);
+  padding: 32px 40px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 0.08em;
+}
+footer em {
+  font-style: italic; font-family: 'Playfair Display', serif;
+  font-size: 16px; color: var(--rose);
+}
+
+/* INPUT TABS */
+.input-tabs {
+  display: flex; gap: 0; margin-bottom: 16px;
+  border: 1px solid var(--border); border-radius: 2px; overflow: hidden;
+}
+.input-tab {
+  flex: 1; padding: 9px 14px; background: transparent;
+  border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--muted); font-weight: 500;
+  transition: all 0.15s; display: flex; align-items: center;
+  justify-content: center; gap: 6px;
+}
+.input-tab.active {
+  background: var(--rose); color: var(--warm-white);
+}
+.input-tab:not(.active):hover { background: var(--blush); color: var(--clay); }
+
+/* PHOTO UPLOAD */
+.photo-zone {
+  border: 2px dashed var(--border); border-radius: 2px;
+  padding: 28px 20px; text-align: center; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 12px;
+  background: var(--cream); position: relative;
+}
+.photo-zone:hover, .photo-zone.dragover {
+  border-color: var(--rose); background: rgba(201,128,106,0.05);
+}
+.photo-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+}
+.photo-icon { font-size: 32px; margin-bottom: 8px; }
+.photo-zone-title {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 16px; color: var(--ink); margin-bottom: 4px;
+}
+.photo-zone-sub {
+  font-size: 12px; color: var(--muted);
+}
+.photo-preview-wrap {
+  position: relative; display: none; margin-bottom: 12px;
+}
+.photo-preview-wrap img {
+  width: 100%; max-height: 200px; object-fit: cover;
+  border-radius: 2px; border: 1px solid var(--border);
+}
+.photo-clear-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--ink); color: var(--warm-white);
+  border: none; border-radius: 50%; width: 26px; height: 26px;
+  font-size: 13px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  opacity: 0.8;
+}
+.photo-clear-btn:hover { opacity: 1; }
+.camera-btn {
+  width: 100%; padding: 10px; margin-bottom: 10px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 2px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--clay); font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.15s;
+}
+.camera-btn:hover { background: var(--blush); border-color: var(--rose); color: var(--rose-deep); }
+.extracted-note {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--safe); letter-spacing: 0.04em;
+  margin-bottom: 10px; display: none;
+  padding: 6px 10px; background: var(--safe-bg);
+  border: 1px solid rgba(107,170,142,0.25); border-radius: 2px;
+}
+
+/* CONFIRMATION PANEL */
+.confirm-panel {
+  display: none; margin-top: 16px;
+  background: var(--blush); border: 1px solid var(--border);
+  border-radius: 2px; padding: 18px;
+}
+.confirm-panel-label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 8px;
+}
+.confirm-product-name {
+  font-family: 'Playfair Display', serif; font-size: 17px;
+  font-weight: 700; margin-bottom: 6px;
+}
+.confirm-ingredients-preview {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+  margin-bottom: 14px;
+  max-height: 72px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+.confirm-note {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--muted); margin-bottom: 14px; line-height: 1.6;
+}
+.confirm-btns { display: flex; gap: 8px; }
+.confirm-yes {
+  flex: 1; padding: 10px;
+  background: var(--rose); color: var(--warm-white);
+  border: none; border-radius: 2px; cursor: pointer;
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px;
+  transition: background 0.15s;
+}
+.confirm-yes:hover { background: var(--rose-deep); }
+.confirm-no {
+  padding: 10px 16px;
+  background: transparent; color: var(--clay);
+  border: 1px solid var(--border); border-radius: 2px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  transition: all 0.15s;
+}
+.confirm-no:hover { background: var(--petal); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-tagline { display: none; }
+  .hero { grid-template-columns: 1fr; gap: 40px; padding: 100px 20px 60px; }
+  .how-section, .flags-section { padding-left: 20px; padding-right: 20px; }
+  .how-grid { grid-template-columns: 1fr; }
+  .disclaimer { padding: 24px 20px; }
+  footer { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Skindex</div>
+  <div class="nav-tagline">Ingredient Intelligence</div>
+  <div class="nav-badge"><div class="nav-dot"></div> AI-Powered</div>
+</nav>
+
+<!-- HERO -->
+<section>
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Skincare Safety Scanner</div>
+      <h1>Know what's<br>touching your <em>skin.</em></h1>
+      <p class="hero-sub">Paste any ingredient list and Skindex flags what's safe, what to watch, and what to avoid — with reasons, not just red dots.</p>
+      <div class="hero-pills">
+        <div class="pill">🌿 Fragrance alerts</div>
+        <div class="pill">⚠️ Irritant detection</div>
+        <div class="pill">🔬 Endocrine disruptors</div>
+        <div class="pill">✨ Beneficial actives</div>
+      </div>
+    </div>
+
+    <!-- SCAN CARD -->
+    <div class="scan-card">
+      <div class="scan-card-label">Ingredient Scanner</div>
+      <div class="scan-card-title">Scan or paste your ingredients</div>
+
+      <!-- TABS -->
+      <div class="input-tabs">
+        <button class="input-tab active" id="tabPhoto" onclick="switchTab('photo')">📸 Photo</button>
+        <button class="input-tab" id="tabText" onclick="switchTab('text')">✍️ Paste text</button>
+      </div>
+
+      <!-- PHOTO MODE -->
+      <div id="photoMode">
+        <div class="photo-preview-wrap" id="previewWrap">
+          <img id="photoPreview" src="" alt="Product photo">
+          <button class="photo-clear-btn" onclick="clearPhoto()">✕</button>
+        </div>
+        <div class="photo-zone" id="photoZone">
+          <input type="file" id="photoFile" accept="image/*" onchange="handlePhotoFile(event)">
+          <div class="photo-icon">🧴</div>
+          <div class="photo-zone-title">Drop a product photo here</div>
+          <div class="photo-zone-sub">or tap to choose from your camera roll</div>
+        </div>
+        <button class="camera-btn" onclick="openCamera()">
+          📷 Take a photo now
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handlePhotoFile(event)" style="position:absolute;opacity:0;width:0;height:0;">
+        </button>
+        <div class="extracted-note" id="extractedNote">✓ Ingredients extracted from photo</div>
+      </div>
+
+      <!-- TEXT MODE -->
+      <div id="textMode" style="display:none;">
+        <textarea id="ingredientInput" placeholder="e.g. Water, Glycerin, Niacinamide, Sodium Lauryl Sulfate, Fragrance, Retinol, Phenoxyethanol..."></textarea>
+        <div class="scan-examples">
+          <span style="font-size:11px; color:var(--muted); align-self:center;">Try:</span>
+          <button class="example-btn" onclick="loadExample('moisturizer')">Moisturizer</button>
+          <button class="example-btn" onclick="loadExample('serum')">Vitamin C Serum</button>
+          <button class="example-btn" onclick="loadExample('cleanser')">Cleanser</button>
+          <button class="example-btn" onclick="loadExample('sunscreen')">Sunscreen</button>
+        </div>
+      </div>
+
+      <button class="scan-btn" id="scanBtn" onclick="scanIngredients()" style="margin-top:4px;">
+        <span id="btnText">Analyse ingredients</span>
+      </button>
+
+      <!-- CONFIRMATION PANEL -->
+      <div class="confirm-panel" id="confirmPanel">
+        <div class="confirm-panel-label">Is this your product?</div>
+        <div class="confirm-product-name" id="confirmProductName"></div>
+        <div class="confirm-ingredients-preview" id="confirmIngredientPreview"></div>
+        <div class="confirm-note">⚠ These ingredients are inferred from our knowledge of this product. They may not reflect the exact current formula — formulations change. Confirm to run the safety analysis, or paste the actual label for certainty.</div>
+        <div class="confirm-btns">
+          <button class="confirm-yes" onclick="confirmAndAnalyze()">Yes, analyse these ingredients</button>
+          <button class="confirm-no" onclick="dismissConfirm()">Not my product</button>
+        </div>
+      </div>
+
+      <div id="results">
+        <div id="loadingState" class="loading-state" style="display:none;">
+          <div class="loading-petals">
+            <div class="loading-petal"></div>
+            <div class="loading-petal"></div>
+            <div class="loading-petal"></div>
+          </div>
+          <div class="loading-text">Reading your formula…</div>
+        </div>
+        <div id="resultsContent" style="display:none;">
+          <div class="results-header">
+            <div class="results-title">Ingredient breakdown</div>
+            <div class="results-summary" id="summaryChips"></div>
+          </div>
+          <div class="ingredient-list" id="ingredientList"></div>
+          <div class="overall-verdict" id="verdict" style="display:none;">
+            <div class="verdict-label">Overall assessment</div>
+            <div class="verdict-text" id="verdictText"></div>
+          </div>
+          <div class="uncertainty-note">
+            ⚠ AI analysis only. Skindex can make mistakes. Reactions vary by individual skin type — consult a dermatologist for medical advice.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="how-inner">
+    <div class="how-eyebrow">How it works</div>
+    <div class="how-title">Transparent by design.</div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-step">Step 01</div>
+        <h3>Paste your list</h3>
+        <p>Copy the ingredient list from the back of any product — or type it in. INCI format or plain text both work.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-step">Step 02</div>
+        <h3>AI reads the formula</h3>
+        <p>Skindex identifies each ingredient and cross-references safety databases — EWG Skin Deep, EU CosIng, PubChem, FDA — flagging concerns with cited sources, not just colors.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-step">Step 03</div>
+        <h3>You decide</h3>
+        <p>The score is a signal, not a verdict. Some flagged ingredients are fine for most people. Skindex explains; you choose.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  <div class="disclaimer-inner">
+    <strong>Disclaimer:</strong> Skindex is an AI-powered educational tool, not a medical device. Ingredient safety assessments are based on general research and may not account for individual skin conditions, allergies, or sensitivities. The model can make mistakes — ingredient databases are incomplete and science evolves. Always patch test new products and consult a licensed dermatologist for personalised advice. Skindex is not affiliated with any cosmetics brand or regulatory body.
+  </div>
+</div>
+
+<footer>
+  <em>Skindex</em> &nbsp;·&nbsp; Ingredient Intelligence &nbsp;·&nbsp; AI can be wrong — your skin knows best.
+</footer>
+
+<script>
+const examples = {
+  moisturizer: "Water, Glycerin, Dimethicone, Niacinamide, Cetearyl Alcohol, Sodium Hyaluronate, Fragrance, Phenoxyethanol, Carbomer, Sodium Hydroxide, Tocopheryl Acetate",
+  serum: "Water, Ascorbic Acid, Propanediol, Niacinamide, Panthenol, Ferulic Acid, Sodium Hyaluronate, Triethanolamine, Alcohol Denat., Phenoxyethanol, Disodium EDTA",
+  cleanser: "Water, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Sodium Lauryl Sulfate, Glycerin, Fragrance, Citric Acid, Sodium Benzoate, Polyquaternium-7",
+  sunscreen: "Water, Homosalate, Octocrylene, Oxybenzone, Avobenzone, Glycerin, Cyclopentasiloxane, Dimethicone, Fragrance, Phenoxyethanol, Carbomer, Triethanolamine"
+};
+
+let currentMode = 'photo';
+let capturedImageBase64 = null;
+let capturedMediaType = 'image/jpeg';
+let confirmedIngredients = null;
+
+function switchTab(mode) {
+  currentMode = mode;
+  document.getElementById('tabPhoto').classList.toggle('active', mode === 'photo');
+  document.getElementById('tabText').classList.toggle('active', mode === 'text');
+  document.getElementById('photoMode').style.display = mode === 'photo' ? 'block' : 'none';
+  document.getElementById('textMode').style.display = mode === 'text' ? 'block' : 'none';
+  resetResults();
+}
+
+function loadExample(type) {
+  document.getElementById('ingredientInput').value = examples[type];
+}
+
+function openCamera() {
+  document.getElementById('cameraInput').click();
+}
+
+function handlePhotoFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  capturedMediaType = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    capturedImageBase64 = dataUrl.split(',')[1];
+    document.getElementById('photoPreview').src = dataUrl;
+    document.getElementById('previewWrap').style.display = 'block';
+    document.getElementById('photoZone').style.display = 'none';
+    document.getElementById('extractedNote').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhoto() {
+  capturedImageBase64 = null;
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('photoZone').style.display = 'block';
+  document.getElementById('photoFile').value = '';
+  document.getElementById('cameraInput').value = '';
+  document.getElementById('extractedNote').style.display = 'none';
+  resetResults();
+}
+
+const zone = document.getElementById('photoZone');
+if (zone) {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handlePhotoFile({ target: { files: [file] } });
+  });
+}
+
+function resetResults() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('resultsContent').style.display = 'none';
+  document.getElementById('confirmPanel').style.display = 'none';
+  confirmedIngredients = null;
+}
+
+function dismissConfirm() {
+  document.getElementById('confirmPanel').style.display = 'none';
+  document.getElementById('ingredientInput').value = '';
+  document.getElementById('ingredientInput').placeholder = 'Paste the actual ingredient list from your product label…';
+  document.getElementById('ingredientInput').focus();
+}
+
+async function confirmAndAnalyze() {
+  document.getElementById('confirmPanel').style.display = 'none';
+  if (confirmedIngredients) {
+    await runAnalysis(confirmedIngredients, false);
+  }
+}
+
+// Detect if input looks like a product name vs ingredient list
+function looksLikeProductName(text) {
+  const words = text.trim().split(/\s+/);
+  if (words.length > 8) return false; // long text = likely ingredient list
+  const iciTerms = ['water','aqua','glycerin','niacinamide','dimethicone','phenoxyethanol','fragrance','parfum','alcohol','acid','sodium','potassium','cetearyl','carbomer','tocopheryl','hyaluronate','propanediol','panthenol','ascorbic','butylene','caprylic','lauryl','silica'];
+  const lowerText = text.toLowerCase();
+  const hasIciTerms = iciTerms.some(t => lowerText.includes(t));
+  const hasCommas = (text.match(/,/g) || []).length >= 2;
+  if (hasIciTerms || hasCommas) return false;
+  return true;
+}
+
+async function scanIngredients() {
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+
+  // Photo mode — skip detection
+  if (currentMode === 'photo' && capturedImageBase64) {
+    await runAnalysis(null, true);
+    btn.disabled = false;
+    return;
+  }
+
+  const input = document.getElementById('ingredientInput').value.trim();
+  if (!input) { btn.disabled = false; return; }
+
+  // Smart detection: looks like a product name?
+  if (looksLikeProductName(input)) {
+    await detectProduct(input);
+  } else {
+    await runAnalysis(input, false);
+  }
+
+  btn.disabled = false;
+}
+
+async function detectProduct(productName) {
+  const resultsDiv = document.getElementById('results');
+  const loadingState = document.getElementById('loadingState');
+  resultsDiv.style.display = 'block';
+  loadingState.style.display = 'flex';
+  document.getElementById('loadingState').querySelector('.loading-text').textContent = 'Looking up product…';
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 800,
+        messages: [{
+          role: "user",
+          content: `The user typed "${productName}" into a skincare ingredient scanner. This looks like a product name, not an ingredient list.
+
+If you recognise this as a specific cosmetic or skincare product, return the known ingredient list for it in this JSON format:
+{
+  "recognised": true,
+  "product_name": "Full official product name",
+  "brand": "Brand name",
+  "ingredients": "Full INCI ingredient list as a comma-separated string"
+}
+
+If you do NOT recognise it as a specific product, or you're not confident in the ingredient list, return:
+{
+  "recognised": false
+}
+
+Only return JSON. No markdown, no backticks, no preamble. Never fabricate ingredients — if uncertain, return recognised: false.`
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(text);
+    loadingState.style.display = 'none';
+
+    if (result.recognised && result.ingredients) {
+      confirmedIngredients = result.ingredients;
+      document.getElementById('confirmProductName').textContent = `${result.brand} — ${result.product_name}`;
+      document.getElementById('confirmIngredientPreview').textContent = result.ingredients;
+      document.getElementById('confirmPanel').style.display = 'block';
+    } else {
+      // Not recognised — prompt user to paste ingredients
+      document.getElementById('resultsContent').style.display = 'block';
+      resultsDiv.style.display = 'block';
+      document.getElementById('ingredientList').innerHTML = `
+        <div style="padding:16px; color:var(--clay); font-size:13px; line-height:1.7;">
+          We couldn't find a known ingredient list for <strong>"${productName}"</strong>. 
+          For an accurate safety analysis, please flip the product over and either 
+          <strong>paste the ingredient list</strong> or <strong>use the photo scanner</strong> to capture the label.
+        </div>`;
+    }
+  } catch (err) {
+    loadingState.style.display = 'none';
+    document.getElementById('resultsContent').style.display = 'block';
+    document.getElementById('ingredientList').innerHTML = `<div style="padding:16px;color:var(--flag);font-size:13px;">Something went wrong. Please try again.</div>`;
+  }
+}
+
+const analysisPrompt = `You are Skindex, a skincare ingredient safety analyzer. Analyze the ingredient list and return ONLY a valid JSON object — no markdown, no backticks, no preamble.
+
+Return this exact JSON structure:
+{
+  "ingredients": [
+    {
+      "name": "ingredient name",
+      "status": "safe" | "caution" | "flagged",
+      "tag": "short label (e.g. Humectant, Irritant, Allergen, Active)",
+      "description": "1-2 sentence plain-language explanation of what it is and why it's flagged/safe",
+      "source": "most authoritative reference: 'EWG Skin Deep', 'EU CosIng Database', 'PubChem', 'FDA Cosmetics', or 'IARC'",
+      "source_url": "real direct URL to this ingredient's entry on that source, or empty string if unsure — never fabricate"
+    }
+  ],
+  "safe_count": number,
+  "caution_count": number,
+  "flagged_count": number,
+  "verdict": "2-3 sentence overall assessment of the formula's safety profile"
+}
+
+Rules:
+- safe = generally well-tolerated, beneficial, or inert
+- caution = potentially irritating for sensitive skin, worth noting
+- flagged = known irritant, allergen, endocrine disruptor, or commonly problematic
+- Cite EWG Skin Deep as default for most cosmetic ingredients; EU CosIng for European regulatory context; PubChem for chemical data; FDA/IARC for regulatory/carcinogen flags
+- Never fabricate source URLs — use empty string if uncertain
+- Only return the JSON, nothing else`;
+
+async function runAnalysis(ingredientText, isPhoto) {
+  const resultsDiv = document.getElementById('results');
+  const loadingState = document.getElementById('loadingState');
+  const resultsContent = document.getElementById('resultsContent');
+
+  resultsDiv.style.display = 'block';
+  loadingState.style.display = 'flex';
+  loadingState.querySelector('.loading-text').textContent = 'Reading your formula…';
+  resultsContent.style.display = 'none';
+
+  try {
+    let messages;
+
+    if (isPhoto && capturedImageBase64) {
+      messages = [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: capturedMediaType, data: capturedImageBase64 } },
+          { type: "text", text: `This is a photo of the back of a cosmetic product. Read the ingredient list from the image, then analyze it.\n\n${analysisPrompt}\n\nIf no ingredient list is visible, return: {"error": "No ingredient list found in image"}` }
+        ]
+      }];
+    } else {
+      messages = [{
+        role: "user",
+        content: `Ingredient list: "${ingredientText}"\n\n${analysisPrompt}`
+      }];
+    }
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages })
+    });
+
+    const data = await response.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(text);
+
+    if (result.error) {
+      loadingState.style.display = 'none';
+      resultsContent.style.display = 'block';
+      document.getElementById('ingredientList').innerHTML = `<div style="padding:16px;color:var(--flag);font-size:13px;">⚠ ${result.error}. Try a clearer photo of the ingredients panel, or switch to text mode.</div>`;
+      return;
+    }
+
+    if (isPhoto) document.getElementById('extractedNote').style.display = 'block';
+    renderResults(result);
+
+  } catch (err) {
+    loadingState.style.display = 'none';
+    resultsContent.style.display = 'block';
+    document.getElementById('ingredientList').innerHTML = `<div style="padding:16px;color:var(--flag);font-size:13px;">Something went wrong. Please try again.</div>`;
+  }
+}
+
+function renderResults(result) {
+  document.getElementById('loadingState').style.display = 'none';
+  const resultsContent = document.getElementById('resultsContent');
+  const list = document.getElementById('ingredientList');
+  const chips = document.getElementById('summaryChips');
+
+  chips.innerHTML = '';
+  if (result.safe_count > 0) chips.innerHTML += `<span class="summary-chip chip-safe">✓ ${result.safe_count} safe</span>`;
+  if (result.caution_count > 0) chips.innerHTML += `<span class="summary-chip chip-caution">⚠ ${result.caution_count} caution</span>`;
+  if (result.flagged_count > 0) chips.innerHTML += `<span class="summary-chip chip-flag">🚩 ${result.flagged_count} flagged</span>`;
+
+  list.innerHTML = '';
+  result.ingredients.forEach((ing, i) => {
+    const row = document.createElement('div');
+    row.className = `ingredient-row ${ing.status === 'flagged' ? 'flagged' : ing.status}`;
+    row.style.animationDelay = `${i * 0.04}s`;
+    row.innerHTML = `
+      <div class="ing-status"></div>
+      <div style="flex:1;">
+        <div class="ing-name">${ing.name}</div>
+        <div class="ing-desc">${ing.description}</div>
+        ${ing.source ? `<div class="ing-source">Source: ${ing.source_url ? `<a href="${ing.source_url}" target="_blank" rel="noopener">${ing.source}</a>` : ing.source}</div>` : ''}
+      </div>
+      <div class="ing-tag">${ing.tag}</div>
+    `;
+    list.appendChild(row);
+  });
+
+  if (result.verdict) {
+    document.getElementById('verdictText').textContent = result.verdict;
+    document.getElementById('verdict').style.display = 'block';
+  }
+
+  resultsContent.style.display = 'block';
+}
+</script>
+</body>
+</html>
