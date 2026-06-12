@@ -335,24 +335,75 @@ function looksLikeIngredientList(text) {
 async function lookupProduct(productName) {
   addTyping();
   try {
-    const res = await callClaude([{ role:'user', content:`The user typed "${productName}" into a skincare scanner. Is this a recognisable cosmetic/skincare product?
+    const res = await callClaude([{ role:'user', content:`The user typed "${productName}" into a skincare scanner.
 
-Return ONLY JSON:
-{"recognised":true/false,"product_name":"Full name","brand":"Brand","ingredients":"Full INCI comma-separated","confidence":"high/medium/low"}
+First, try to match this to a specific known product. If you can match it confidently, return the exact product with ingredients.
 
-Never fabricate ingredients. If unsure return {"recognised":false}. Only return JSON.` }]);
+If it's too vague (e.g. "Kylie Jenner foundation", "elf lip tint"), return 3 specific product matches the user might mean.
+
+Return ONLY JSON — no markdown:
+
+Option A — exact match found:
+{"type":"exact","product_name":"Full name","brand":"Brand","ingredients":"Full INCI comma-separated","confidence":"high|medium|low"}
+
+Option B — vague, show suggestions:
+{"type":"suggestions","suggestions":[
+  {"product_name":"Full name","brand":"Brand","short_desc":"e.g. Matte finish, SPF 30"},
+  {"product_name":"Full name","brand":"Brand","short_desc":"e.g. Satin finish, buildable"},
+  {"product_name":"Full name","brand":"Brand","short_desc":"e.g. Dewy finish, hydrating"}
+]}
+
+Option C — not recognised at all:
+{"type":"unknown"}
+
+Never fabricate ingredients. Only return JSON.` }]);
     removeTyping();
-    const result = JSON.parse(res.replace(/\`\`\`json|\`\`\`/g,'').trim());
-    if (result.recognised && result.ingredients) {
+    const result = JSON.parse(res.replace(/```json|```/g,'').trim());
+
+    if (result.type === 'exact' && result.ingredients) {
       pendingIngredients = result.ingredients;
       pendingProductName = `${result.brand} — ${result.product_name}`;
-      const confNote = result.confidence === 'low' ? '<br><small style="color:var(--muted);">⚠ I\'m not 100% certain this is the current formula — formulations change.</small>' : '';
+      const confNote = result.confidence === 'low' ? '<br><small style="color:var(--muted);">⚠ Formulations can change — confirm if this looks right.</small>' : '';
       botMsg(`Found it! 🎉<br><br><strong>${result.brand} — ${result.product_name}</strong><br><span style="font-size:12px;color:var(--muted);">${result.ingredients.split(',').slice(0,5).join(', ')}…</span>${confNote}<br><br>Is this the one?`);
       await sleep(400);
       addQR(['✅ Yes, that\'s it', '❌ Not my product']);
       chatStep = 'confirming';
+
+    } else if (result.type === 'suggestions' && result.suggestions?.length) {
+      botMsg(`I found a few products that could match — which one are you looking at? 👇`);
+      await sleep(400);
+      // Show suggestion cards
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'padding-left:36px;display:flex;flex-direction:column;gap:8px;';
+      result.suggestions.forEach(s => {
+        const btn = document.createElement('button');
+        btn.style.cssText = 'background:var(--warm-white);border:1px solid var(--border);padding:10px 14px;border-radius:8px;text-align:left;cursor:pointer;transition:all 0.15s;font-family:"DM Sans",sans-serif;';
+        btn.innerHTML = `<div style="font-weight:600;font-size:13px;color:var(--ink);">${s.brand} — ${s.product_name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">${s.short_desc}</div>`;
+        btn.onmouseenter = () => { btn.style.borderColor='var(--rose)'; btn.style.background='var(--blush)'; };
+        btn.onmouseleave = () => { btn.style.borderColor='var(--border)'; btn.style.background='var(--warm-white)'; };
+        btn.onclick = () => {
+          wrap.remove();
+          userMsg(`${s.brand} — ${s.product_name}`);
+          processInput(`${s.brand} ${s.product_name}`);
+        };
+        wrap.appendChild(btn);
+      });
+      // Add "none of these" option
+      const noneBtn = document.createElement('button');
+      noneBtn.style.cssText = 'background:transparent;border:1px solid var(--border);padding:8px 14px;border-radius:20px;text-align:left;cursor:pointer;font-size:12px;color:var(--muted);font-family:"DM Sans",sans-serif;';
+      noneBtn.textContent = 'None of these — I\'ll paste the ingredients';
+      noneBtn.onclick = () => {
+        wrap.remove();
+        userMsg('None of these');
+        setTimeout(() => botMsg('No problem! Paste the ingredient list from the back of your product and I\'ll analyze it.'), 400);
+        chatStep = 'greeting';
+      };
+      wrap.appendChild(noneBtn);
+      append(wrap);
+      chatStep = 'confirming';
+
     } else {
-      botMsg(`I couldn't find a known formula for <strong>"${productName}"</strong>. Try pasting the ingredient list from the back of the product instead.`);
+      botMsg(`I couldn't find a match for <strong>"${productName}"</strong>. Try being more specific (brand + product name) or paste the ingredient list from the back of the product.`);
       chatStep = 'greeting';
     }
   } catch(e) {
