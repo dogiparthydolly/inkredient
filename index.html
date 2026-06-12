@@ -612,32 +612,13 @@ footer em {
       </div>
 
       <!-- Input area -->
-      <div style="border-top:1px solid var(--border);padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
-
-        <!-- Action buttons row -->
-        <div style="display:flex;gap:8px;">
-          <label style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--blush);border:1px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--clay);font-weight:500;transition:all 0.15s;" title="Open folder" onmouseenter="this.style.borderColor='var(--rose)';this.style.color='var(--rose-deep)'" onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--clay)'">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            Attach photo
-            <input type="file" accept="image/*" onchange="handleChatPhoto(event)" style="display:none;">
-          </label>
-
-          <label style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--blush);border:1px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--clay);font-weight:500;transition:all 0.15s;" title="Open camera" onmouseenter="this.style.borderColor='var(--rose)';this.style.color='var(--rose-deep)'" onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--clay)'">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Camera
-            <input type="file" accept="image/*" capture="environment" onchange="handleChatPhoto(event)" style="display:none;">
-          </label>
+      <div style="border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:flex-end;">
+        <div style="flex:1;">
+          <textarea id="chatInput" placeholder="Type a product name or ingredient list…" style="width:100%;resize:none;border:1px solid var(--border);border-radius:20px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--cream);outline:none;line-height:1.5;max-height:100px;overflow-y:auto;" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
         </div>
-
-        <!-- Text input + send -->
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-          <div style="flex:1;">
-            <textarea id="chatInput" placeholder="Type a product name or ingredient list…" style="width:100%;resize:none;border:1px solid var(--border);border-radius:20px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--cream);outline:none;line-height:1.5;max-height:100px;overflow-y:auto;" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-          </div>
-          <button onclick="sendMessage()" id="sendBtn" style="width:38px;height:38px;background:var(--rose);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background 0.15s;" onmouseenter="this.style.background='var(--rose-deep)'" onmouseleave="this.style.background='var(--rose)'">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
+        <button onclick="sendMessage()" id="sendBtn" style="width:38px;height:38px;background:var(--rose);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background 0.15s;" onmouseenter="this.style.background='var(--rose-deep)'" onmouseleave="this.style.background='var(--rose)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -691,8 +672,8 @@ let userConcern = null;
 
 // ── Boot ───────────────────────────────────────────
 window.addEventListener('load', () => {
-  setTimeout(() => addBotMessage("Hi! 👋 I'm Inkredient. Tell me what product you're looking at — type the name, paste the ingredient list, or snap a photo of the back label."), 400);
-  setTimeout(() => addQuickReplies(['📸 Take a photo', '🧴 Paste ingredient list', '💄 Try an example']), 900);
+  setTimeout(() => addBotMessage("Hi! 👋 I'm Inkredient. Tell me what product you're looking at — type the name or paste the ingredient list."), 400);
+  setTimeout(() => addQuickReplies(['🧴 Paste ingredient list', '💄 Try an example']), 900);
 });
 
 // ── Chat UI helpers ────────────────────────────────
@@ -796,24 +777,19 @@ function clearChatPhoto() {
 // ── Quick replies ──────────────────────────────────
 function handleQuickReply(opt) {
   removeQuickReplies();
-  if (opt === '📸 Take a photo' || opt === '📸 Upload a photo') {
-    addUserMessage('📸 I\'ll take a photo');
-    document.querySelector('input[capture="environment"]').click();
-    setTimeout(() => addBotMessage('Nice — snap the back of the product so I can read the ingredients label. Good lighting helps! 📸'), 400);
-  } else if (opt === '🧴 Paste ingredient list') {
+  if (opt === '🧴 Paste ingredient list') {
     addUserMessage('I\'ll paste the ingredient list');
-    setTimeout(() => addBotMessage('Perfect — paste the ingredient list below and hit send. You can copy it straight from the back of your product.'), 400);
+    setTimeout(() => addBotMessage('Perfect — type or paste the ingredient list below and hit send.'), 400);
   } else if (opt === '💄 Try an example') {
     addUserMessage('Show me an example');
     processInput('Neutrogena Ultra Sheer Dry-Touch Sunscreen SPF 50', null);
   } else if (opt === '✅ Yes, that\'s it') {
-    removeQuickReplies();
+    addUserMessage('Yes, that\'s it');
     askConcern();
   } else if (opt === '❌ Not my product') {
-    removeQuickReplies();
     addUserMessage('Not my product');
     setTimeout(() => {
-      addBotMessage('No worries! Try typing the exact product name, paste the ingredient list, or snap a photo of the back label.');
+      addBotMessage('No worries! Try typing the exact product name or paste the ingredient list.');
       chatStep = 'greeting';
       pendingIngredients = null;
       pendingProductName = null;
@@ -822,6 +798,8 @@ function handleQuickReply(opt) {
     userConcern = opt;
     addUserMessage(opt);
     runFinalAnalysis();
+  } else if (opt === '📸 Scan another' || opt === '🔄 Start over') {
+    resetChat();
   }
 }
 
@@ -1069,20 +1047,8 @@ function resetChat() {
   document.getElementById('chatMessages').innerHTML = '';
   chatStep = 'greeting';
   pendingPhoto = null; pendingIngredients = null; pendingProductName = null; userConcern = null;
-  clearChatPhoto();
   setTimeout(() => addBotMessage("Hi again! 👋 What product are you looking at?"), 300);
-  setTimeout(() => addQuickReplies(['📸 Take a photo', '🧴 Paste ingredient list', '💄 Try an example']), 700);
-}
-
-// Handle "Scan another" / "Start over" quick replies
-const _origHandleQR = handleQuickReply;
-function handleQuickReply(opt) {
-  if (opt === '📸 Scan another' || opt === '🔄 Start over') {
-    removeQuickReplies();
-    resetChat();
-  } else {
-    _origHandleQR(opt);
-  }
+  setTimeout(() => addQuickReplies(['🧴 Paste ingredient list', '💄 Try an example']), 700);
 }
 
 function enterSite() {
